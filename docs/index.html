@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Archive</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0d1321;
+      color: white;
+      text-align: center;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+    .box {
+      background: #171f2d;
+      border: 1px solid #2a3448;
+      border-radius: 18px;
+      padding: 30px;
+      margin-top: 20px;
+    }
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #7c3aed, #10b981);
+      color: white;
+      text-decoration: none;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-weight: bold;
+      margin-top: 18px;
+    }
+    input {
+      width: 100%;
+      max-width: 520px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid #30405c;
+      background: #101b2d;
+      color: white;
+      margin: 10px 0;
+      box-sizing: border-box;
+    }
+    button {
+      background: #7c3aed;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 22px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .status {
+      margin-top: 12px;
+      color: #cbd5e1;
+      min-height: 22px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Game Archive</h1>
+
+    <div class="box">
+      <p>Browse and submit game links.</p>
+
+      <form id="siteForm">
+        <input id="siteName" type="text" placeholder="Site name" required />
+        <br />
+        <input id="siteURL" type="url" placeholder="https://example.com" required />
+        <br />
+        <button type="submit">Submit Site</button>
+      </form>
+
+      <div id="status" class="status"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+
+    const adultPatterns = [
+      "porn", "porno", "xxx", "sex", "sexy", "adult", "onlyfans", "camgirl",
+      "playboy", "escort", "redtube", "xvideos", "xnxx", "strip", "fetish",
+      "webcam", "sexchat", "horny", "nude", "nudity", "mature", "lesbian",
+      "gayporn", "adultcontent", "freeporn", "teenporn", "teens", "pornhub"
+    ];
+
+    const warningMessages = [
+      "Stop.",
+      "Hell no.",
+      "Please stop.",
+      "I'm warning you. Please stop.",
+      "That's it."
+    ];
+
+    function startsAdultAttempt(name, url) {
+      const text = (name + " " + url).toLowerCase();
+      return adultPatterns.some(p => text.includes(p));
+    }
+
+    function speakWarning(text) {
+      if ("speechSynthesis" in window) {
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.9;
+        u.pitch = 1.2;
+        u.volume = 1;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+      }
+    }
+
+    function playAlarm() {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sawtooth";
+      osc.frequency.value = 880;
+      gain.gain.value = 0.08;
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+
+      const start = ctx.currentTime;
+      osc.frequency.linearRampToValueAtTime(1800, start + 0.18);
+      gain.gain.linearRampToValueAtTime(0.14, start + 0.18);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.8);
+
+      setTimeout(() => osc.stop(), 900);
+    }
+
+    document.getElementById("siteForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("siteName").value.trim();
+      const url = document.getElementById("siteURL").value.trim();
+      const status = document.getElementById("status");
+
+      if (!name || !url) {
+        status.textContent = "Please enter a name and URL.";
+        return;
+      }
+
+      const adultAttempt = startsAdultAttempt(name, url);
+
+      if (adultAttempt) {
+        let attempts = Number(localStorage.getItem("adultAttemptCounter") || 0);
+        attempts += 1;
+        localStorage.setItem("adultAttemptCounter", String(attempts));
+
+        const message = warningMessages[Math.min(attempts - 1, warningMessages.length - 1)];
+        status.textContent = message;
+
+        if (attempts >= 2) {
+          playAlarm();
+          speakWarning("This person is trying to put adult content into a kids website.");
+        }
+
+        if (attempts >= 5) {
+          status.textContent = "That's it.";
+          playAlarm();
+          speakWarning("This person is trying to put adult content into a kids website.");
+        }
+
+        return;
+      }
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, url })
+        });
+
+        const json = await response.json();
+
+        if (json.ok === false) {
+          status.textContent = json.message || "Rejected.";
+          return;
+        }
+
+        status.textContent = "Submitted successfully.";
+      } catch (err) {
+        status.textContent = "Please enter a valid URL and make sure the Apps Script is connected.";
+      }
+    });
+  </script>
+</body>
+</html>
