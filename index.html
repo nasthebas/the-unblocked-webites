@@ -37,7 +37,7 @@
 
       h1 {
         text-align: center;
-        font-size: clamp(2rem, 5vw, 3.3rem);
+        font-size: clamp(2rem, 5vw, 3.5rem);
         margin: 0 0 18px;
       }
 
@@ -66,7 +66,7 @@
         cursor: pointer;
         box-shadow: 0 10px 20px var(--shadow);
         transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-        min-height: 80px;
+        min-height: 82px;
       }
 
       .site-btn:nth-child(3n + 2) {
@@ -168,12 +168,14 @@
 
         <div id="status" class="status">Add a site name and URL to make a new button.</div>
         <p class="note">
-          This version saves new buttons in this browser. For the button to appear for everyone, you need a shared backend like Google Sheets + Apps Script, Supabase, or Firebase.
+          The buttons are shared through a backend. If no backend is configured yet, the page falls back to local storage.
         </p>
       </div>
     </div>
 
     <script>
+      const SHARED_API = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+      const STORAGE_KEY = 'unblocked-websites-buttons';
       const defaultSites = [
         { name: 'Cherry', url: 'https://s3.amazonaws.com/ow9bpeb/index.html' },
         { name: 'Tongue Tongue', url: 'https://djz51oelf1hfk.cloudfront.net/' },
@@ -181,23 +183,40 @@
         { name: 'Strawberry', url: 'https://s3.amazonaws.com/strawberrii/index.svg' }
       ];
 
-      const storageKey = 'unblocked-websites-buttons';
-
-      function getSites() {
-        const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
-        if (!saved || !Array.isArray(saved) || saved.length === 0) {
+      function loadLocalSites() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+          return Array.isArray(saved) ? saved : defaultSites;
+        } catch {
           return defaultSites;
         }
-        return saved;
       }
 
-      function saveSites(sites) {
-        localStorage.setItem(storageKey, JSON.stringify(sites));
+      function saveLocalSites(sites) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(sites));
       }
 
-      function renderButtons() {
+      async function loadSites() {
+        if (!SHARED_API || SHARED_API.includes('PASTE_')) {
+          return loadLocalSites();
+        }
+
+        try {
+          const response = await fetch(`${SHARED_API}?action=get`, { cache: 'no-store' });
+          if (!response.ok) throw new Error('Fetch failed');
+          const json = await response.json();
+          if (Array.isArray(json.sites) && json.sites.length > 0) {
+            return json.sites;
+          }
+        } catch (error) {
+          console.warn('Shared API unavailable, using local data instead.', error);
+        }
+
+        return loadLocalSites();
+      }
+
+      function renderButtons(sites) {
         const grid = document.getElementById('button-grid');
-        const sites = getSites();
         grid.innerHTML = '';
 
         sites.forEach((site) => {
@@ -212,16 +231,19 @@
         });
       }
 
+      async function refreshSites() {
+        const sites = await loadSites();
+        renderButtons(sites);
+      }
+
       const form = document.getElementById('site-form');
-      const nameInput = document.getElementById('site-name');
-      const urlInput = document.getElementById('site-url');
       const status = document.getElementById('status');
 
-      form.addEventListener('submit', (event) => {
+      form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        const name = nameInput.value.trim();
-        const url = urlInput.value.trim();
+        const name = document.getElementById('site-name').value.trim();
+        const url = document.getElementById('site-url').value.trim();
 
         if (!name || !url) {
           status.textContent = 'Please enter both a site name and a valid URL.';
@@ -229,24 +251,43 @@
         }
 
         try {
-          const fullUrl = new URL(url);
-          if (!['http:', 'https:'].includes(fullUrl.protocol)) {
+          const parsed = new URL(url);
+          if (!['http:', 'https:'].includes(parsed.protocol)) {
             throw new Error('Invalid protocol');
           }
 
-          const sites = getSites();
-          sites.unshift({ name, url: fullUrl.href });
-          saveSites(sites);
-          renderButtons();
+          if (SHARED_API && !SHARED_API.includes('PASTE_')) {
+            const response = await fetch(SHARED_API, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name, url: parsed.href })
+            });
 
+            const json = await response.json();
+
+            if (!response.ok || json.ok === false) {
+              status.textContent = json.message || 'This site was rejected by the filter.';
+              return;
+            }
+
+            status.textContent = 'Site added successfully.';
+            form.reset();
+            await refreshSites();
+            return;
+          }
+
+          const sites = loadLocalSites();
+          sites.unshift({ name, url: parsed.href });
+          saveLocalSites(sites);
           form.reset();
           status.textContent = 'Site added successfully.';
-        } catch (error) {
+          renderButtons(sites);
+        } catch (err) {
           status.textContent = 'Please enter a valid http or https URL.';
         }
       });
 
-      renderButtons();
+      refreshSites();
     </script>
   </body>
 </html>
