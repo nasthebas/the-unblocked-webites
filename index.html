@@ -32,13 +32,13 @@
       }
 
       .container {
-        width: min(900px, 100%);
+        width: min(980px, 100%);
       }
 
       h1 {
         text-align: center;
         font-size: clamp(2rem, 5vw, 3.3rem);
-        margin: 0 0 20px;
+        margin: 0 0 18px;
       }
 
       .subtitle {
@@ -66,14 +66,15 @@
         cursor: pointer;
         box-shadow: 0 10px 20px var(--shadow);
         transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+        min-height: 80px;
       }
 
-      .site-btn:nth-child(2n) {
+      .site-btn:nth-child(3n + 2) {
         background: linear-gradient(135deg, var(--accent-2), #ffbd59);
         color: #1d1d1d;
       }
 
-      .site-btn:nth-child(3n) {
+      .site-btn:nth-child(3n + 3) {
         background: linear-gradient(135deg, var(--accent-3), #67d39f);
         color: #0d2414;
       }
@@ -101,15 +102,15 @@
         font-size: 1.6rem;
       }
 
-      form {
+      .form-row {
         display: flex;
         gap: 12px;
         flex-wrap: wrap;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
       }
 
-      input[type="url"] {
-        flex: 1 1 300px;
+      .form-row input {
+        flex: 1 1 240px;
         min-width: 0;
         padding: 14px 16px;
         border-radius: 12px;
@@ -119,7 +120,7 @@
         font-size: 1rem;
       }
 
-      button[type="submit"] {
+      .form-row button {
         padding: 14px 18px;
         border: none;
         border-radius: 12px;
@@ -135,25 +136,14 @@
         margin: 8px 0 14px;
       }
 
-      .suggested-list {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .suggested-list li {
-        background: rgba(255, 255, 255, 0.04);
-        border-radius: 10px;
-        padding: 10px 12px;
-        word-break: break-all;
+      .note {
         color: var(--muted);
+        font-size: 0.95rem;
+        margin: 12px 0 0;
       }
 
       @media (max-width: 500px) {
-        form {
+        .form-row {
           flex-direction: column;
         }
       }
@@ -164,78 +154,99 @@
       <h1>Cherry · Tongue Tongue · Strawberry</h1>
       <p class="subtitle">Open a site below</p>
 
-      <div class="button-grid">
-        <button class="site-btn" data-url="https://s3.amazonaws.com/ow9bpeb/index.html">Cherry</button>
-        <button class="site-btn" data-url="https://djz51oelf1hfk.cloudfront.net/">Tongue Tongue</button>
-        <button class="site-btn" data-url="https://chrisets.s3.amazonaws.com/index.html#goog_rewarded">Strawberry</button>
-        <button class="site-btn" data-url="https://s3.amazonaws.com/strawberrii/index.svg">Strawberry</button>
-      </div>
+      <div id="button-grid" class="button-grid"></div>
 
       <div class="suggestion-box">
-        <h2>Submit a new URL</h2>
-        <form id="url-form">
-          <input id="url-input" type="url" placeholder="Paste a new URL here" required />
-          <button type="submit">Send</button>
+        <h2>Request a site</h2>
+        <form id="site-form">
+          <div class="form-row">
+            <input id="site-name" type="text" placeholder="Site name" maxlength="40" required />
+            <input id="site-url" type="url" placeholder="https://example.com" required />
+            <button type="submit">Add button</button>
+          </div>
         </form>
-        <div id="status" class="status">Your suggestion will be reviewed and added later.</div>
 
-        <ul id="suggested-list" class="suggested-list"></ul>
+        <div id="status" class="status">Add a site name and URL to make a new button.</div>
+        <p class="note">
+          This version saves new buttons in this browser. For the button to appear for everyone, you need a shared backend like Google Sheets + Apps Script, Supabase, or Firebase.
+        </p>
       </div>
     </div>
 
     <script>
-      const buttons = document.querySelectorAll('.site-btn');
-      buttons.forEach((button) => {
-        button.addEventListener('click', () => {
-          const url = button.getAttribute('data-url');
-          window.open(url, '_blank', 'noopener,noreferrer');
-        });
-      });
+      const defaultSites = [
+        { name: 'Cherry', url: 'https://s3.amazonaws.com/ow9bpeb/index.html' },
+        { name: 'Tongue Tongue', url: 'https://djz51oelf1hfk.cloudfront.net/' },
+        { name: 'Strawberry', url: 'https://chrisets.s3.amazonaws.com/index.html#goog_rewarded' },
+        { name: 'Strawberry', url: 'https://s3.amazonaws.com/strawberrii/index.svg' }
+      ];
 
-      const form = document.getElementById('url-form');
-      const urlInput = document.getElementById('url-input');
-      const status = document.getElementById('status');
-      const list = document.getElementById('suggested-list');
+      const storageKey = 'unblocked-websites-buttons';
 
-      function renderSuggestions() {
-        const saved = JSON.parse(localStorage.getItem('siteSuggestions') || '[]');
-        list.innerHTML = '';
-
-        if (!saved.length) {
-          const item = document.createElement('li');
-          item.textContent = 'No suggestions yet.';
-          list.appendChild(item);
-          return;
+      function getSites() {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
+        if (!saved || !Array.isArray(saved) || saved.length === 0) {
+          return defaultSites;
         }
+        return saved;
+      }
 
-        saved.forEach((url) => {
-          const item = document.createElement('li');
-          item.textContent = url;
-          list.appendChild(item);
+      function saveSites(sites) {
+        localStorage.setItem(storageKey, JSON.stringify(sites));
+      }
+
+      function renderButtons() {
+        const grid = document.getElementById('button-grid');
+        const sites = getSites();
+        grid.innerHTML = '';
+
+        sites.forEach((site) => {
+          const button = document.createElement('button');
+          button.className = 'site-btn';
+          button.type = 'button';
+          button.textContent = site.name;
+          button.addEventListener('click', () => {
+            window.open(site.url, '_blank', 'noopener,noreferrer');
+          });
+          grid.appendChild(button);
         });
       }
 
+      const form = document.getElementById('site-form');
+      const nameInput = document.getElementById('site-name');
+      const urlInput = document.getElementById('site-url');
+      const status = document.getElementById('status');
+
       form.addEventListener('submit', (event) => {
         event.preventDefault();
-        const value = urlInput.value.trim();
 
-        if (!value) {
-          status.textContent = 'Please enter a valid URL.';
+        const name = nameInput.value.trim();
+        const url = urlInput.value.trim();
+
+        if (!name || !url) {
+          status.textContent = 'Please enter both a site name and a valid URL.';
           return;
         }
 
-        const saved = JSON.parse(localStorage.getItem('siteSuggestions') || '[]');
-        if (!saved.includes(value)) {
-          saved.unshift(value);
-          localStorage.setItem('siteSuggestions', JSON.stringify(saved));
-        }
+        try {
+          const fullUrl = new URL(url);
+          if (!['http:', 'https:'].includes(fullUrl.protocol)) {
+            throw new Error('Invalid protocol');
+          }
 
-        urlInput.value = '';
-        status.textContent = 'Thanks! Your URL has been saved and will be reviewed.';
-        renderSuggestions();
+          const sites = getSites();
+          sites.unshift({ name, url: fullUrl.href });
+          saveSites(sites);
+          renderButtons();
+
+          form.reset();
+          status.textContent = 'Site added successfully.';
+        } catch (error) {
+          status.textContent = 'Please enter a valid http or https URL.';
+        }
       });
 
-      renderSuggestions();
+      renderButtons();
     </script>
   </body>
 </html>
