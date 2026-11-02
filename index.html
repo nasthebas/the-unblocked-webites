@@ -1,672 +1,724 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Game Archive</title>
-    <style>
-      :root {
-        --bg: #0b1020;
-        --bg-2: #111827;
-        --panel: rgba(17, 24, 39, 0.9);
-        --panel-strong: #111827;
-        --panel-soft: #1f2937;
-        --line: rgba(148, 163, 184, 0.2);
-        --text: #edf2ff;
-        --muted: #b8c4d9;
-        --accent: #7c3aed;
-        --accent-2: #00c2a8;
-        --accent-3: #f59e0b;
-        --danger: #ef4444;
-        --success: #22c55e;
-        --shadow: rgba(0, 0, 0, 0.35);
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Archive</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --bg2: #101a2a;
+      --panel: #111d2f;
+      --panel2: #162338;
+      --soft: #1e2d46;
+      --line: #2c3f5e;
+      --text: #edf3ff;
+      --muted: #a6b7d4;
+      --primary: #7c3aed;
+      --secondary: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --shadow: rgba(0, 0, 0, 0.35);
+    }
 
-      * { box-sizing: border-box; }
+    * { box-sizing: border-box; }
 
-      html {
-        scroll-behavior: smooth;
-      }
+    html { scroll-behavior: smooth; }
 
-      body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background:
-          radial-gradient(circle at top, rgba(124, 58, 237, 0.18), transparent 30%),
-          radial-gradient(circle at bottom right, rgba(0, 194, 168, 0.14), transparent 30%),
-          linear-gradient(180deg, var(--bg), #070d18);
-        color: var(--text);
-      }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(124, 58, 237, 0.16), transparent 35%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      color: var(--text);
+      min-height: 100vh;
+    }
 
-      a {
-        color: inherit;
-        text-decoration: none;
-      }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
-      .container {
-        width: min(1180px, calc(100% - 32px));
-        margin: 0 auto;
-      }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 20px 64px;
+    }
 
-      header {
-        position: sticky;
-        top: 0;
-        z-index: 20;
-        background: rgba(11, 16, 32, 0.8);
-        backdrop-filter: blur(12px);
-        border-bottom: 1px solid var(--line);
-      }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 26px;
+      padding: 12px 14px;
+      background: rgba(17, 29, 47, 0.82);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 8px 24px var(--shadow);
+    }
 
-      .nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 20px;
-        padding: 18px 0;
-      }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
 
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-weight: 800;
-        letter-spacing: 0.04em;
-      }
+    .brand-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      box-shadow: 0 10px 20px rgba(124, 58, 237, 0.35);
+    }
 
-      .brand-mark {
-        width: 36px;
-        height: 36px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, var(--accent), var(--accent-2));
-        display: grid;
-        place-items: center;
-        font-size: 1.1rem;
-        box-shadow: 0 10px 24px rgba(124, 58, 237, 0.4);
-      }
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
 
-      .nav-links {
-        display: flex;
-        align-items: center;
-        gap: 18px;
-        color: var(--muted);
-        font-size: 0.95rem;
-      }
+    .nav a {
+      color: var(--muted);
+      padding: 8px 12px;
+      border-radius: 10px;
+      transition: 0.2s ease;
+    }
 
-      .nav-links a:hover {
-        color: var(--text);
-      }
+    .nav a:hover {
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+    }
 
+    .hero {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 24px;
+    }
+
+    .hero-main, .hero-side, .panel {
+      background: rgba(17, 29, 47, 0.9);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: 0 12px 28px var(--shadow);
+    }
+
+    .hero-main {
+      padding: 28px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #b7c7ea;
+      background: rgba(124, 58, 237, 0.14);
+      border: 1px solid rgba(124, 58, 237, 0.32);
+      border-radius: 999px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: clamp(2.1rem, 5vw, 4rem);
+      line-height: 1.05;
+      margin: 0 0 12px;
+      letter-spacing: -0.05em;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.7;
+      margin: 0 0 18px;
+      max-width: 700px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+      opacity: 0.97;
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      color: white;
+      box-shadow: 0 12px 24px rgba(124, 58, 237, 0.35);
+    }
+
+    .button.secondary {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .hero-side {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .mini-stat {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 18px;
+    }
+
+    .mini-stat .label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .mini-stat .value {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-top: 8px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 12px 0 24px;
+      align-items: center;
+    }
+
+    .search-wrap {
+      flex: 1;
+      min-width: 220px;
+      position: relative;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      padding: 15px 16px 15px 42px;
+      font-size: 1rem;
+      background: rgba(16, 26, 42, 0.9);
+      border: 1px solid var(--line);
+      color: var(--text);
+      border-radius: 12px;
+      outline: none;
+    }
+
+    .search-wrap::before {
+      content: "⌕";
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+
+    .toolbar .button {
+      min-width: 150px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 18px 0 12px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      letter-spacing: -0.04em;
+    }
+
+    .badge {
+      display: inline-flex;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(16, 185, 129, 0.12);
+      color: #9ae6b4;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .game-card {
+      background: linear-gradient(180deg, rgba(17, 29, 47, 0.96), rgba(16, 26, 42, 0.96));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 12px 24px var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .game-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(124, 58, 237, 0.7);
+    }
+
+    .game-card .icon {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(16, 185, 129, 0.18));
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      font-size: 1.3rem;
+    }
+
+    .game-card h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      letter-spacing: -0.04em;
+    }
+
+    .game-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      min-height: 44px;
+    }
+
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #a7f3d0;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .open {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(124, 58, 237, 0.16);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      color: #ddd6fe;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .panel {
+      margin-top: 30px;
+      padding: 22px;
+    }
+
+    .panel h2 {
+      margin: 0 0 14px;
+      font-size: 1.45rem;
+    }
+
+    .submit-form {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .submit-form input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(11, 18, 32, 0.9);
+      color: var(--text);
+      outline: none;
+      font-size: 1rem;
+    }
+
+    .status {
+      min-height: 24px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .status.error {
+      color: #fecaca;
+    }
+
+    .status.success {
+      color: #bbf7d0;
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 28px 0 12px;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 900px) {
       .hero {
-        padding: 56px 0 26px;
+        grid-template-columns: 1fr;
       }
 
-      .hero-box {
-        background: linear-gradient(135deg, rgba(124,58,237,0.14), rgba(0,194,168,0.09));
-        border: 1px solid var(--line);
-        border-radius: 24px;
-        padding: 28px;
-        box-shadow: 0 20px 36px var(--shadow);
+      .submit-form {
+        grid-template-columns: 1fr;
       }
-
-      .hero-grid {
-        display: grid;
-        grid-template-columns: 1.5fr 0.9fr;
-        gap: 20px;
-        align-items: center;
-      }
-
-      .eyebrow {
-        display: inline-block;
-        padding: 8px 12px;
-        border-radius: 999px;
-        background: rgba(124,58,237,0.14);
-        color: #dcd3ff;
-        border: 1px solid rgba(124,58,237,0.25);
-        font-size: 0.8rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      h1 {
-        margin: 16px 0 12px;
-        font-size: clamp(2.4rem, 5vw, 4.5rem);
-        line-height: 0.95;
-        letter-spacing: -0.06em;
-      }
-
-      .hero p {
-        margin: 0;
-        max-width: 620px;
-        color: var(--muted);
-        font-size: 1.03rem;
-        line-height: 1.6;
-      }
-
-      .hero-actions {
-        margin-top: 22px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-      }
-
-      .primary-btn, .secondary-btn, .submit-btn {
-        border: none;
-        border-radius: 12px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: transform 0.15s ease, filter 0.15s ease;
-      }
-
-      .primary-btn:hover, .secondary-btn:hover, .submit-btn:hover {
-        transform: translateY(-1px);
-        filter: brightness(1.05);
-      }
-
-      .primary-btn {
-        background: linear-gradient(135deg, var(--accent), #8b5cf6);
-        color: white;
-        padding: 14px 20px;
-        box-shadow: 0 14px 30px rgba(124, 58, 237, 0.35);
-      }
-
-      .secondary-btn {
-        background: rgba(255,255,255,0.04);
-        color: var(--text);
-        border: 1px solid var(--line);
-        padding: 14px 20px;
-      }
-
-      .hero-stats {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(120px, 1fr));
-        gap: 14px;
-      }
-
-      .stat-card {
-        background: rgba(17, 24, 39, 0.7);
-        border: 1px solid var(--line);
-        border-radius: 18px;
-        padding: 18px 16px;
-      }
-
-      .stat-card strong {
-        display: block;
-        font-size: 1.8rem;
-        font-weight: 800;
-        margin-bottom: 6px;
-      }
-
-      .stat-card span {
-        color: var(--muted);
-        font-size: 0.8rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      main {
-        padding-bottom: 60px;
-      }
-
-      section {
-        margin-top: 30px;
-      }
-
-      .section-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 18px;
-      }
-
-      .section-head h2 {
-        margin: 0;
-        font-size: clamp(1.3rem, 3vw, 2rem);
-        letter-spacing: -0.04em;
-      }
-
-      .search-wrap {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: rgba(17, 24, 39, 0.76);
-        border: 1px solid var(--line);
-        border-radius: 14px;
-        padding: 10px 14px;
-        width: min(320px, 100%);
-      }
-
-      .search-wrap input {
-        flex: 1;
-        border: none;
-        background: transparent;
-        color: var(--text);
-        font-size: 0.98rem;
-        outline: none;
-      }
-
-      .search-wrap input::placeholder {
-        color: var(--muted);
-      }
-
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 18px;
-      }
-
-      .game-card {
-        background: linear-gradient(180deg, rgba(17,24,39,0.88), rgba(17,24,39,0.72));
-        border: 1px solid var(--line);
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 18px 30px rgba(0,0,0,0.2);
-        transition: transform 0.2s ease, border-color 0.2s ease;
-      }
-
-      .game-card:hover {
-        transform: translateY(-3px);
-        border-color: rgba(124,58,237,0.42);
-      }
-
-      .thumb {
-        position: relative;
-        height: 130px;
-        background:
-          linear-gradient(135deg, rgba(124,58,237,0.38), rgba(0,194,168,0.22)),
-          linear-gradient(120deg, #1f2937, #0f172a);
-        display: grid;
-        place-items: center;
-        color: white;
-        font-size: 2rem;
-        font-weight: 800;
-      }
-
-      .thumb::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.18) 100%);
-      }
-
-      .thumb-text {
-        position: relative;
-        z-index: 1;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        opacity: 0.9;
-      }
-
-      .card-body {
-        padding: 16px 16px 18px;
-      }
-
-      .card-meta {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        margin-bottom: 10px;
-        color: var(--muted);
-        font-size: 0.74rem;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-      }
-
-      .tag {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 8px;
-        border-radius: 999px;
-        background: rgba(124,58,237,0.12);
-        border: 1px solid rgba(124,58,237,0.2);
-        color: #ddd6fe;
-        font-weight: 700;
-      }
-
-      .card-body h3 {
-        margin: 0 0 10px;
-        font-size: 1.32rem;
-        line-height: 1.2;
-      }
-
-      .card-body p {
-        margin: 0 0 14px;
-        color: var(--muted);
-        line-height: 1.5;
-        font-size: 0.94rem;
-      }
-
-      .card-footer {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-      }
-
-      .site-url {
-        color: var(--muted);
-        font-size: 0.8rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .launch-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, var(--accent-2), #30d3b9);
-        color: #04140f;
-        border: none;
-        border-radius: 10px;
-        padding: 10px 14px;
-        font-weight: 800;
-        cursor: pointer;
-      }
-
-      .request-box {
-        margin-top: 26px;
-        background: rgba(17, 24, 39, 0.76);
-        border: 1px solid var(--line);
-        border-radius: 20px;
-        padding: 22px;
-        box-shadow: 0 20px 34px rgba(0, 0, 0, 0.18);
-      }
-
-      .request-box h3 {
-        margin: 0 0 16px;
-        font-size: clamp(1.4rem, 3vw, 2rem);
-      }
-
-      .request-form {
-        display: grid;
-        grid-template-columns: 1fr 1.6fr auto;
-        gap: 12px;
-      }
-
-      .request-form input {
-        width: 100%;
-        border: 1px solid var(--line);
-        background: rgba(15, 23, 42, 0.8);
-        color: var(--text);
-        border-radius: 12px;
-        padding: 14px 16px;
-        font-size: 1rem;
-      }
-
-      .request-form input::placeholder {
-        color: var(--muted);
-      }
-
-      .submit-btn {
-        background: linear-gradient(135deg, #7c3aed, #4f46e5);
-        color: white;
-        padding: 14px 18px;
-      }
-
-      .status {
-        min-height: 22px;
-        margin-top: 14px;
-        color: var(--muted);
-        font-size: 0.95rem;
-      }
-
-      .status.success { color: var(--success); }
-      .status.error { color: var(--danger); }
-
-      @media (max-width: 760px) {
-        .hero-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .nav-links {
-          display: none;
-        }
-
-        .request-form {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <div class="container nav">
-        <div class="brand">
-          <div class="brand-mark">G</div>
-          <span>Game Archive</span>
-        </div>
-
-        <nav class="nav-links">
-          <a href="#library">Library</a>
-          <a href="#submit">Submit</a>
-          <a href="#featured">Featured</a>
-        </nav>
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-badge">🎮</div>
+        <span>Game Archive</span>
       </div>
+
+      <nav class="nav">
+        <a href="#games">Games</a>
+        <a href="#submit">Submit</a>
+        <a href="#about">About</a>
+      </nav>
     </header>
 
     <section class="hero">
-      <div class="container hero-box">
-        <div class="hero-grid">
-          <div>
-            <span class="eyebrow">New collection</span>
-            <h1>Play games without the clutter.</h1>
-            <p>
-              Browse a curated set of game links, quick launch sites, and community-submitted resources.
-              Every item is reviewed and organized for easy access.
-            </p>
+      <div class="hero-main">
+        <div class="eyebrow">Archive • Explore • Submit</div>
+        <h1>Play, discover, and save your favorite games.</h1>
+        <p class="sub">
+          Browse a growing library of game links in one clean place. Find new titles, revisit old favorites,
+          and submit fresh links to keep the archive alive.
+        </p>
 
-            <div class="hero-actions">
-              <button class="primary-btn" type="button" onclick="document.getElementById('library').scrollIntoView({behavior:'smooth'})">
-                Browse library
-              </button>
-              <button class="secondary-btn" type="button" onclick="document.getElementById('submit').scrollIntoView({behavior:'smooth'})">
-                Submit a site
-              </button>
-            </div>
-          </div>
-
-          <div class="hero-stats">
-            <div class="stat-card">
-              <strong id="stat-sites">0</strong>
-              <span>Links</span>
-            </div>
-            <div class="stat-card">
-              <strong>24/7</strong>
-              <span>Ready</span>
-            </div>
-            <div class="stat-card">
-              <strong>AI</strong>
-              <span>Filter</span>
-            </div>
-            <div class="stat-card">
-              <strong>Manual</strong>
-              <span>Review</span>
-            </div>
-          </div>
+        <div class="hero-actions">
+          <a class="button primary" href="#games">Browse Games</a>
+          <a class="button secondary" href="#submit">Submit a Game</a>
         </div>
       </div>
-    </section>
 
-    <main class="container">
-      <section id="library">
-        <div class="section-head">
-          <h2>Game library</h2>
-          <div class="search-wrap">
-            <span>🔎</span>
-            <input id="searchInput" type="text" placeholder="Search games..." />
-          </div>
+      <aside class="hero-side">
+        <div class="mini-stat">
+          <div class="label">Approved</div>
+          <div class="value" id="approvedCount">0</div>
         </div>
 
-        <div id="gamesGrid" class="grid"></div>
-      </section>
+        <div class="mini-stat">
+          <div class="label">Status</div>
+          <div class="value" style="font-size: 1.2rem;">Live</div>
+        </div>
+      </aside>
+    </section>
 
-      <section id="submit" class="request-box">
-        <h3>Submit a game or site</h3>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <input id="searchInput" type="text" placeholder="Search games..." />
+      </div>
+      <button class="button primary" id="refreshBtn" type="button">Refresh</button>
+    </div>
 
-        <form id="siteForm" class="request-form">
-          <input id="siteName" type="text" placeholder="Site name" maxlength="40" required />
-          <input id="siteURL" type="url" placeholder="https://example.com" required />
-          <button class="submit-btn" type="submit">Add</button>
-        </form>
+    <section id="games">
+      <div class="section-head">
+        <h2>Latest Games</h2>
+        <span class="badge">Approved</span>
+      </div>
+      <div id="gamesGrid" class="games-grid"></div>
+    </section>
 
-        <div id="status" class="status"></div>
-      </section>
-    </main>
+    <section id="submit" class="panel">
+      <h2>Submit a Game</h2>
+      <form id="siteForm" class="submit-form">
+        <input id="siteName" type="text" placeholder="Game name" required />
+        <input id="siteURL" type="url" placeholder="https://example.com" required />
+        <button class="button primary" type="submit">Submit</button>
+      </form>
+      <div id="status" class="status"></div>
+    </section>
 
-    <script>
-      const API_URL = "PASTE_YOUR_SCRIPT_URL_HERE";
+    <section id="about" class="panel">
+      <h2>About</h2>
+      <p style="color: var(--muted); line-height: 1.8; margin: 0;">
+        This archive is designed to help players find and share games in one clean, simple place.
+        Each site is checked before appearing in the list and can be reviewed or updated at any time.
+      </p>
+    </section>
 
-      const defaultSites = [
-        { name: "Cherry", url: "https://s3.amazonaws.com/ow9bpeb/index.html" },
-        { name: "Tongue Tongue", url: "https://djz51oelf1hfk.cloudfront.net/" },
-        { name: "Strawberry", url: "https://chrisets.s3.amazonaws.com/index.html#goog_rewarded" },
-        { name: "Strawberry", url: "https://s3.amazonaws.com/strawberrii/index.svg" }
-      ];
+    <div class="footer">
+      © 2026 Game Archive
+    </div>
+  </div>
 
-      function getInitials(name) {
-        return name
-          .split(" ")
-          .map(part => part[0])
-          .join("")
-          .slice(0, 2)
-          .toUpperCase();
+  <script>
+    const API_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+
+    const adultPatterns = [
+      "porn", "porno", "xxx", "sex", "sexy", "adult", "onlyfans", "camgirl",
+      "playboy", "escort", "redtube", "xvideos", "xnxx", "strip", "fetish",
+      "webcam", "sexchat", "horny", "nude", "nudity", "mature", "lesbian",
+      "gayporn", "adultcontent", "freeporn", "teenporn", "teens", "pornhub"
+    ];
+
+    const warningMessages = [
+      "Stop.",
+      "Hell no.",
+      "Please stop.",
+      "I'm warning you. Please stop.",
+      "That's it."
+    ];
+
+    const gamesGrid = document.getElementById("gamesGrid");
+    const approvedCount = document.getElementById("approvedCount");
+    const status = document.getElementById("status");
+    const searchInput = document.getElementById("searchInput");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    function startsAdultAttempt(name, url) {
+      const text = (name + " " + url).toLowerCase();
+      return adultPatterns.some(pattern => text.includes(pattern));
+    }
+
+    function speakWarning(text) {
+      if ("speechSynthesis" in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9;
+        utterance.pitch = 1.2;
+        utterance.volume = 1;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
       }
+    }
 
-      function formatDomain(url) {
-        try {
-          return new URL(url).hostname.replace(/^www\./, "");
-        } catch {
-          return "site";
-        }
-      }
+    function playAlarm() {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
 
-      async function loadSites() {
-        try {
-          const response = await fetch(`${API_URL}?action=get`, { cache: "no-store" });
-          const json = await response.json();
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
 
-          if (json && Array.isArray(json.sites) && json.sites.length > 0) {
-            return json.sites;
-          }
-        } catch (err) {
-          console.warn("Using fallback links", err);
-        }
+      osc.type = "sawtooth";
+      osc.frequency.value = 880;
+      gain.gain.value = 0.08;
 
-        return defaultSites;
-      }
+      osc.connect(gain);
+      gain.connect(ctx.destination);
 
-      function renderSites(list) {
-        const grid = document.getElementById("gamesGrid");
-        grid.innerHTML = "";
+      osc.start();
 
-        if (!list.length) {
-          grid.innerHTML = `
-            <div class="game-card" style="grid-column: 1 / -1;">
-              <div class="card-body">
-                <h3>No matching games found</h3>
-                <p>Try another search term or submit a new site.</p>
-              </div>
+      const start = ctx.currentTime;
+      osc.frequency.linearRampToValueAtTime(1800, start + 0.18);
+      gain.gain.linearRampToValueAtTime(0.14, start + 0.18);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.8);
+
+      setTimeout(() => osc.stop(), 900);
+    }
+
+    function cardIcon(name) {
+      const n = (name || "").toLowerCase();
+      if (n.includes("minecraft")) return "⛏️";
+      if (n.includes("roblox")) return "🧱";
+      if (n.includes("fortnite")) return "🛡️";
+      if (n.includes("pokemon")) return "⚡";
+      if (n.includes("arcade")) return "🕹️";
+      if (n.includes("racing")) return "🏎️";
+      if (n.includes("battle")) return "⚔️";
+      if (n.includes("strategy")) return "♟️";
+      return "🎯";
+    }
+
+    function renderGames(items) {
+      gamesGrid.innerHTML = "";
+
+      if (!items.length) {
+        gamesGrid.innerHTML = `
+          <div class="game-card" style="grid-column: 1 / -1;">
+            <div class="icon">📭</div>
+            <h3>No games yet</h3>
+            <p>Be the first to submit a game to the archive.</p>
+            <div class="card-actions">
+              <span class="tag">Empty</span>
             </div>
-          `;
-          return;
-        }
-
-        list.forEach((site) => {
-          const card = document.createElement("article");
-          card.className = "game-card";
-
-          const initials = getInitials(site.name || "Game");
-          const domain = formatDomain(site.url);
-
-          card.innerHTML = `
-            <div class="thumb">
-              <span class="thumb-text">${initials}</span>
-            </div>
-            <div class="card-body">
-              <div class="card-meta">
-                <span class="tag">${domain}</span>
-                <span>Ready</span>
-              </div>
-              <h3>${site.name}</h3>
-              <p>Quick-access game link with a clean, direct launch.</p>
-              <div class="card-footer">
-                <span class="site-url">${domain}</span>
-                <button class="launch-btn" type="button">Open</button>
-              </div>
-            </div>
-          `;
-
-          card.querySelector(".launch-btn").addEventListener("click", () => {
-            window.open(site.url, "_blank", "noopener,noreferrer");
-          });
-
-          grid.appendChild(card);
-        });
+          </div>
+        `;
+        approvedCount.textContent = "0";
+        return;
       }
 
-      async function refreshSites() {
-        const sites = await loadSites();
-        const searchInput = document.getElementById("searchInput");
-        const query = (searchInput.value || "").trim().toLowerCase();
+      approvedCount.textContent = String(items.length);
 
-        const filtered = sites.filter(site =>
-          (site.name || "").toLowerCase().includes(query) ||
-          (site.url || "").toLowerCase().includes(query)
-        );
+      items.forEach(item => {
+        const card = document.createElement("article");
+        card.className = "game-card";
 
-        renderSites(filtered);
-        document.getElementById("stat-sites").textContent = String(sites.length);
-      }
-
-      document.getElementById("searchInput").addEventListener("input", refreshSites);
-
-      document.getElementById("siteForm").addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        const name = document.getElementById("siteName").value.trim();
-        const url = document.getElementById("siteURL").value.trim();
-        const status = document.getElementById("status");
-
-        if (!name || !url) {
-          status.textContent = "Please enter a name and URL.";
-          status.className = "status error";
-          return;
-        }
-
+        let domain = "example.com";
         try {
-          const parsed = new URL(url);
-          if (!["http:", "https:"].includes(parsed.protocol)) {
-            throw new Error("Invalid protocol");
-          }
-
-          const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, url: parsed.href })
-          });
-
-          const json = await response.json();
-
-          if (!response.ok || json.ok === false) {
-            status.textContent = json.message || "Your site was rejected.";
-            status.className = "status error";
-            return;
-          }
-
-          status.textContent = "Submission received. It will appear after review.";
-          status.className = "status success";
-          document.getElementById("siteForm").reset();
-          await refreshSites();
-        } catch (err) {
-          status.textContent = "Please enter a valid http or https URL.";
-          status.className = "status error";
+          domain = new URL(item.url).hostname.replace("www.", "");
+        } catch (e) {
+          domain = item.url;
         }
+
+        card.innerHTML = `
+          <div class="icon">${cardIcon(item.name)}</div>
+          <div>
+            <h3>${item.name}</h3>
+            <p>${domain}</p>
+          </div>
+          <div class="card-actions">
+            <span class="tag">Game</span>
+            <a class="open" href="${item.url}" target="_blank" rel="noopener noreferrer">Open</a>
+          </div>
+        `;
+
+        gamesGrid.appendChild(card);
       });
+    }
 
-      refreshSites();
-    </script>
-  </body>
+    async function fetchGames() {
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+
+        if (!data || !Array.isArray(data.sites)) {
+          renderGames([]);
+          return;
+        }
+
+        renderGames(data.sites);
+      } catch (err) {
+        renderGames([]);
+      }
+    }
+
+    searchInput.addEventListener("input", () => {
+      const term = searchInput.value.trim().toLowerCase();
+      const cards = [...document.querySelectorAll(".game-card")];
+
+      cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(term) ? "flex" : "none";
+      });
+    });
+
+    refreshBtn.addEventListener("click", fetchGames);
+
+    document.getElementById("siteForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const name = document.getElementById("siteName").value.trim();
+      const url = document.getElementById("siteURL").value.trim();
+      const statusEl = document.getElementById("status");
+
+      if (!name || !url) {
+        statusEl.textContent = "Please enter a name and URL.";
+        statusEl.className = "status error";
+        return;
+      }
+
+      const adultAttempt = startsAdultAttempt(name, url);
+
+      if (adultAttempt) {
+        let attempts = Number(localStorage.getItem("adultAttemptCounter") || 0);
+        attempts += 1;
+        localStorage.setItem("adultAttemptCounter", String(attempts));
+
+        const msg = warningMessages[Math.min(attempts - 1, warningMessages.length - 1)];
+        statusEl.textContent = msg;
+        statusEl.className = "status error";
+
+        if (attempts >= 2) {
+          playAlarm();
+          speakWarning("This person is trying to put adult content into a kids website.");
+        }
+
+        if (attempts >= 5) {
+          statusEl.textContent = "That's it.";
+          statusEl.className = "status error";
+          playAlarm();
+          speakWarning("This person is trying to put adult content into a kids website.");
+        }
+
+        document.getElementById("siteForm").reset();
+        return;
+      }
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, url })
+        });
+
+        const json = await res.json();
+
+        if (!res.ok || json.ok === false) {
+          statusEl.textContent = json.message || "This submission was rejected.";
+          statusEl.className = "status error";
+          return;
+        }
+
+        statusEl.textContent = "Submitted successfully.";
+        statusEl.className = "status success";
+        document.getElementById("siteForm").reset();
+        fetchGames();
+      } catch (err) {
+        statusEl.textContent = "Please enter a valid URL and make sure the Google Script is connected.";
+        statusEl.className = "status error";
+      }
+    });
+
+    fetchGames();
+  </script>
+</body>
 </html>
