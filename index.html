@@ -501,7 +501,12 @@
   </div>
 
   <script>
-    const API_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxnVIBTj9Uh0OK4AZaTZ5b2Fqy1XmSaHmUQDYh1BH0sWYhFBxpONL7ok_ptTrKh47rMQQ/exec";
+    const STORAGE_KEY = "gameArchiveSites";
+    const defaultGames = [
+      { name: "Minecraft", url: "https://www.minecraft.net/" },
+      { name: "Roblox", url: "https://www.roblox.com/" }
+    ];
 
     const adultPatterns = [
       "porn", "porno", "xxx", "sex", "sexy", "adult", "onlyfans", "camgirl",
@@ -523,6 +528,29 @@
     const status = document.getElementById("status");
     const searchInput = document.getElementById("searchInput");
     const refreshBtn = document.getElementById("refreshBtn");
+
+    function getStoredGames() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        if (Array.isArray(saved) && saved.length) {
+          return saved;
+        }
+      } catch (err) {
+        // Ignore corrupt local data and fall back to defaults.
+      }
+
+      return [...defaultGames];
+    }
+
+    function saveGames(items) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function normalizeGameList(data) {
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.sites)) return data.sites;
+      return [];
+    }
 
     function startsAdultAttempt(name, url) {
       const text = (name + " " + url).toLowerCase();
@@ -626,19 +654,23 @@
     }
 
     async function fetchGames() {
-      try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
+      if (API_URL) {
+        try {
+          const response = await fetch(API_URL);
+          const data = await response.json();
+          const serverGames = normalizeGameList(data);
 
-        if (!data || !Array.isArray(data.sites)) {
-          renderGames([]);
-          return;
+          if (serverGames.length) {
+            saveGames(serverGames);
+            renderGames(serverGames);
+            return;
+          }
+        } catch (err) {
+          // Fall back to local storage if the Apps Script is unavailable.
         }
-
-        renderGames(data.sites);
-      } catch (err) {
-        renderGames([]);
       }
+
+      renderGames(getStoredGames());
     }
 
     searchInput.addEventListener("input", () => {
@@ -694,26 +726,41 @@
       }
 
       try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, url })
-        });
+        if (API_URL) {
+          const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, url })
+          });
 
-        const json = await res.json();
+          const json = await res.json();
 
-        if (!res.ok || json.ok === false) {
-          statusEl.textContent = json.message || "This submission was rejected.";
+          if (!res.ok || json.ok === false) {
+            throw new Error(json.message || "This submission was rejected.");
+          }
+        }
+
+        const currentGames = getStoredGames();
+        const duplicate = currentGames.some(item =>
+          item.name.toLowerCase() === name.toLowerCase() ||
+          item.url.toLowerCase() === url.toLowerCase()
+        );
+
+        if (duplicate) {
+          statusEl.textContent = "This game is already in the archive.";
           statusEl.className = "status error";
           return;
         }
 
+        const nextGames = [{ name, url }, ...currentGames];
+        saveGames(nextGames);
+
         statusEl.textContent = "Submitted successfully.";
         statusEl.className = "status success";
         document.getElementById("siteForm").reset();
-        fetchGames();
+        renderGames(nextGames);
       } catch (err) {
-        statusEl.textContent = "Please enter a valid URL and make sure the Google Script is connected.";
+        statusEl.textContent = err.message || "Please enter a valid URL and make sure the Google Script is connected.";
         statusEl.className = "status error";
       }
     });
